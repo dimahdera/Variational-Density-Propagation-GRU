@@ -1,0 +1,11 @@
+ Input Dimension : 25
+ No Hidden Nodes : 64
+ Output Size : 10
+ No of epochs : 50
+ Learning rate : 0.001
+ time step : 28
+---------------------------------
+ Averaged Test Accuracy : 0.30579954
+---------------------------------
+ Random Noise std: 0.5
+---------------------------------
