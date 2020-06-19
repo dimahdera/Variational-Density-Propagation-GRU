@@ -238,10 +238,11 @@ class LinearNotFirst(keras.layers.Layer):
         Sigma_3 = tr_Sigma_w_Sigma_in (Sigma_in, W_Sigma)
         Sigma_out = Sigma_1 + Sigma_2 + Sigma_3 + tf.linalg.diag(tf.math.log(1. + tf.math.exp(self.b_sigma))) 
         
-        Term1 = tf.reduce_mean(tf.math.log(1.0 + Sigma_out))
-        Term2 = tf.reduce_mean(tf.square(mu_out))
-        Term3 = tf.reduce_mean(Sigma_out)
-        kl_loss = -0.5 * (Term1 - Term2 - Term3)
+        Term1 = self.w_mu.shape[0]*tf.math.log(tf.math.log(1. + tf.math.exp(self.w_sigma)))
+        Term2 = tf.math.reduce_sum(tf.reduce_sum(tf.abs(self.w_mu)))
+        Term3 = self.w_mu.shape[0]*tf.math.log(1. + tf.math.exp(self.w_sigma))        
+        
+        kl_loss = -0.5 * tf.reduce_mean(Term1 - Term2 - Term3)
         self.add_loss(kl_loss)
         return mu_out, Sigma_out
 
@@ -328,8 +329,9 @@ def main_function(time_step = 28, input_dim = 25, units = 64, output_size = 10 ,
             loss_final = nll_gaussian(y, logits,  tf.clip_by_value(t=sigma, clip_value_min=tf.constant(-1e+10),
                                        clip_value_max=tf.constant(1e+10)), output_size , batch_size)
             
-
-            loss = loss_final #+ loss_layers
+            #loss_layers = sum(gru_model.losses)
+            
+            loss = loss_final #+ 0.001*loss_layers
             gradients = tape.gradient(loss, gru_model.trainable_weights)
         optimizer.apply_gradients(zip(gradients, gru_model.trainable_weights))
         
